@@ -1,0 +1,1405 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Upstream Deal Sourcing — Automated Quantitative MLS & Public Market Underwriting Engine</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    body { font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif; background-color: #FFFFFF; color: #0F172A; }
+    .mono { font-family: 'JetBrains Mono', monospace; font-variant-numeric: tabular-nums; }
+    .subtle-grid {
+      background-image: radial-gradient(#CBD5E1 1px, transparent 1px);
+      background-size: 24px 24px;
+    }
+  </style>
+</head>
+<body class="antialiased selection:bg-emerald-600 selection:text-white overflow-x-hidden">
+
+  <!-- NETLIFY SERVER-SIDE BACKUP FORMS -->
+  <form name="seat-booking" method="POST" data-netlify="true" netlify-honeypot="bot-field" hidden>
+    <input type="text" name="invoiceId" />
+    <input type="text" name="clientName" />
+    <input type="email" name="clientEmail" />
+    <input type="text" name="clientPhone" />
+    <input type="text" name="state" />
+    <input type="text" name="paymentMethod" />
+    <input type="text" name="referredBy" />
+    <input type="text" name="amountUsd" />
+  </form>
+
+  <form name="sample-dossier" method="POST" data-netlify="true" netlify-honeypot="bot-field" hidden>
+    <input type="email" name="leadEmail" />
+    <input type="text" name="targetState" />
+    <input type="text" name="referredBy" />
+  </form>
+
+  <form name="payment-confirmation" method="POST" data-netlify="true" netlify-honeypot="bot-field" hidden>
+    <input type="text" name="invoiceId" />
+    <input type="email" name="clientEmail" />
+    <input type="text" name="txReference" />
+  </form>
+
+  <script>
+    const PORTAL_CONFIG = {
+      brandName: "Upstream Deal Sourcing",
+      founderEmail: "nayeembiswas440@gmail.com",
+      monthlyPrice: 149,
+      crmSyncEndpoint: "https://script.google.com/macros/s/AKfycbzCo2QYdpno5PMq9TvK6IuSNT4pyqoX1do_6pg9xdI_J31NimO4Vkbl7E8AJGq7N4-m/exec",
+      remitlyUrl: "https://remit.ly/pay/mdnayeemb8050",
+      remitlyTag: "@mdnayeemb8050",
+      crypto: {
+        network: "BNB Smart Chain (BEP20)",
+        acceptedTokens: "USDT or USDC (BEP20)",
+        walletAddress: "0x596d0AC8c79cbCC4e4e22A75B5E4E3c4dDf32d6F"
+      },
+      usBankAch: {
+        beneficiaryName: "Md Nayeem Biswas",
+        bankName: "JP Morgan Chase NA",
+        bankAddress: "270 Park Avenue, New York, NY 10017",
+        routingNumber: "028000024",
+        accountNumber: "30000002951453",
+        accountType: "Checking (Current)"
+      }
+    };
+  </script>
+  <script src="live_portal_data.js"></script>
+
+  <!-- STICKY FLOATING SUBSCRIPTION CTA -->
+  <div id="stickyCtaBar" class="fixed bottom-4 right-4 left-4 sm:left-auto sm:bottom-6 sm:right-6 z-30 transition-all duration-300">
+    <a href="#seat-allocation" class="flex items-center justify-between sm:justify-center gap-3 bg-emerald-600 hover:bg-emerald-700 text-white font-bold px-5 py-3.5 rounded-xl shadow-2xl shadow-emerald-950/30 border border-emerald-500 text-xs sm:text-sm transition transform hover:-translate-y-0.5">
+      <span class="flex items-center gap-2">
+        <span class="w-2 h-2 rounded-full bg-white animate-pulse"></span>
+        <span>Claim Territory ($149/mo • 0% Fee)</span>
+      </span>
+      <span class="bg-emerald-800/70 px-2 py-0.5 rounded text-[11px] mono" id="stickySeatsBadge">66/72 Left</span>
+    </a>
+  </div>
+
+  <!-- TOP NAVIGATION BAR -->
+  <header class="sticky top-0 z-40 bg-white/95 backdrop-blur-md border-b border-slate-200">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+      <a href="#" class="flex items-center gap-3">
+        <div class="w-9 h-9 rounded-lg bg-slate-900 flex items-center justify-center text-white font-bold text-xs tracking-wider mono">
+          UDS
+        </div>
+        <div>
+          <span class="font-bold text-slate-900 text-sm sm:text-base tracking-tight block leading-none">Upstream Deal Sourcing</span>
+          <span class="text-[11px] text-slate-500 font-medium block mt-1">Automated Quantitative MLS &amp; Public Market Underwriting</span>
+        </div>
+      </a>
+
+      <nav class="hidden lg:flex items-center gap-7 text-sm font-medium text-slate-600">
+        <a href="#live-feed" class="hover:text-slate-900 transition">Top 1% Feed</a>
+        <a href="#how-it-works" class="hover:text-slate-900 transition">How It Works</a>
+        <a href="#underwriting" class="hover:text-slate-900 transition">70% ARV Calculator</a>
+        <a href="#pricing-alignment" class="hover:text-slate-900 transition">Pricing</a>
+        <a href="#seat-allocation" class="hover:text-slate-900 transition">72-Seat Board</a>
+        <a href="#faq" class="hover:text-slate-900 transition">FAQ</a>
+      </nav>
+
+      <div class="flex items-center gap-2.5">
+        <a href="mailto:nayeembiswas440@gmail.com?subject=Inquiry%20-%20Upstream%20Deal%20Sourcing%20Territory" class="hidden sm:inline-flex items-center gap-1.5 text-xs font-semibold text-slate-700 bg-white hover:bg-slate-50 border border-slate-300 px-3.5 py-2 rounded-lg transition">
+          Talk to the Founder
+        </a>
+        <a href="#seat-allocation" class="bg-emerald-600 hover:bg-emerald-700 text-white font-semibold text-xs sm:text-sm px-4 py-2 rounded-lg transition shadow-xs">
+          Claim Your State
+        </a>
+      </div>
+    </div>
+  </header>
+
+  <!-- 2-COLUMN QUANTITATIVE UNDERWRITING HERO -->
+  <section class="relative bg-slate-50/80 subtle-grid border-b border-slate-200 pt-12 pb-16 lg:pt-20 lg:pb-24">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-12 items-center">
+        <div class="lg:col-span-6">
+          <div class="inline-flex flex-wrap items-center gap-2 px-3.5 py-1.5 rounded-full bg-white border border-slate-200 shadow-2xs text-xs font-semibold text-slate-800 mb-6">
+            <span class="w-2 h-2 rounded-full bg-emerald-500"></span>
+            <span>38-Column Automated Quantitative Underwriting &amp; Offer Suite</span>
+          </div>
+
+          <h1 class="text-3xl sm:text-4xl lg:text-[42px] font-extrabold text-slate-900 tracking-tight leading-[1.15]">
+            Isolate the Top 1% Deep-Equity &amp; Price-Drop Deals — Ready for Instant Cash Offers.
+          </h1>
+
+          <p class="mt-5 text-base sm:text-[17px] text-slate-600 leading-relaxed">
+            Built for serious investors, flippers, and wholesalers who are tired of spending hours on manual comping or paying expensive VAs. Every 15 minutes, our 3-layer quantitative engine audits <strong class="text-slate-900 font-semibold">100+ U.S. markets across 26 states</strong>, isolating <strong class="text-slate-900 font-semibold">deep-equity (15–40%+ below median) and motivated price-drop listings</strong>—complete with <strong class="text-slate-900 font-semibold">70% MAO math, Zillow Comps, County Tax links, and ready-to-send Cash Offer scripts</strong>.
+          </p>
+
+          <div class="mt-8 flex flex-col sm:flex-row items-stretch sm:items-center gap-3.5">
+            <a href="#seat-allocation" class="inline-flex justify-center items-center bg-emerald-600 hover:bg-emerald-700 text-white font-bold px-7 py-4 rounded-xl text-sm sm:text-base transition shadow-lg shadow-emerald-600/20">
+              Claim Your State ($149/mo Flat) →
+            </a>
+            <a href="#free-sample" class="inline-flex justify-center items-center bg-white hover:bg-slate-50 text-slate-800 border border-slate-300 font-semibold px-5 py-4 rounded-xl text-sm transition">
+              Get Free 26-Col Sample Dossier
+            </a>
+          </div>
+
+          <div class="mt-6 flex flex-wrap items-center gap-x-6 gap-y-2.5 text-xs font-semibold text-slate-600">
+            <span class="flex items-center gap-1.5"><svg class="w-4 h-4 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg> 0% Success Fee — Keep 100% of Profits</span>
+            <span class="flex items-center gap-1.5"><svg class="w-4 h-4 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg> Ready-to-Send Offer Scripts</span>
+            <span class="flex items-center gap-1.5"><svg class="w-4 h-4 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg> Capped at 72 Global Seats</span>
+          </div>
+        </div>
+
+        <!-- CLEAN SANITIZED PREVIEW CARD -->
+        <div class="lg:col-span-6">
+          <div class="bg-white border border-slate-200 rounded-2xl shadow-xl shadow-slate-900/5 overflow-hidden">
+            <div class="bg-slate-900 px-4 py-3.5 flex items-center justify-between">
+              <div class="flex items-center gap-2">
+                <span class="w-2.5 h-2.5 rounded-full bg-rose-500"></span>
+                <span class="w-2.5 h-2.5 rounded-full bg-amber-400"></span>
+                <span class="w-2.5 h-2.5 rounded-full bg-emerald-500"></span>
+                <span class="ml-2 text-xs font-medium text-slate-300 mono">Private Cloud Workspace • 38-Col Executive CRM</span>
+              </div>
+              <span class="text-[11px] font-semibold text-emerald-400 bg-emerald-500/10 border border-emerald-500/30 px-2.5 py-0.5 rounded mono">LIVE SYNC</span>
+            </div>
+
+            <div class="bg-slate-100 px-4 pt-2.5 border-b border-slate-200 flex items-center gap-1.5 text-xs overflow-x-auto">
+              <span class="bg-white text-slate-900 font-semibold px-3 py-1.5 rounded-t-md border-t border-x border-slate-200">Jacksonville</span>
+              <span class="text-slate-500 px-3 py-1.5">Tampa</span>
+              <span class="text-slate-500 px-3 py-1.5">Orlando</span>
+              <span class="text-slate-500 px-3 py-1.5">Cape Coral</span>
+              <span class="text-slate-400 px-2 py-1.5">+12 Metros</span>
+            </div>
+
+            <div class="p-4 sm:p-5 space-y-3.5 text-xs">
+              <div class="p-4 rounded-xl bg-slate-50 border border-slate-200">
+                <div class="flex items-center justify-between gap-2">
+                  <span class="font-bold text-slate-900">Record #12040 • <span class="blur-[2.5px] select-none">4821</span> W 28th St, Jacksonville, FL</span>
+                  <span class="px-2 py-0.5 rounded bg-emerald-100 text-emerald-800 font-bold mono text-[11px] whitespace-nowrap">94 DOM • 3 CUTS (-$35k)</span>
+                </div>
+                <div class="text-slate-500 mt-1.5">Single Family • 3 Bed / 2 Bath • 1,248 SqFt • Built 1986 • HOA $0/mo</div>
+                <div class="mt-3 pt-3 border-t border-slate-200 grid grid-cols-3 gap-2 mono">
+                  <div><span class="text-slate-400 block text-[10px]">ASKING PRICE</span><strong class="text-slate-900">$104,900</strong></div>
+                  <div><span class="text-slate-400 block text-[10px]">CONSERVATIVE ARV</span><strong class="text-emerald-700">$200,928 (+$96k)</strong></div>
+                  <div><span class="text-slate-400 block text-[10px]">HUD 3BR YIELD</span><strong class="text-blue-700">18.2% ($1,590/mo)</strong></div>
+                </div>
+                <div class="mt-2.5 pt-2 border-t border-slate-200/70 flex flex-wrap items-center gap-1.5 text-[10px] font-semibold">
+                  <span class="px-2 py-0.5 rounded bg-blue-50 text-blue-700 border border-blue-200">✓ Cash Offer Script</span>
+                  <span class="px-2 py-0.5 rounded bg-slate-100 text-slate-700 border border-slate-200">✓ Zillow Comps</span>
+                  <span class="px-2 py-0.5 rounded bg-slate-100 text-slate-700 border border-slate-200">✓ County Tax Link</span>
+                </div>
+              </div>
+
+              <div class="p-4 rounded-xl bg-slate-50 border border-slate-200">
+                <div class="flex items-center justify-between gap-2">
+                  <span class="font-bold text-slate-900">Record #74025 • <span class="blur-[2.5px] select-none">1904</span> Sawmill Point, Jacksonville, FL</span>
+                  <span class="px-2 py-0.5 rounded bg-amber-100 text-amber-900 font-bold mono text-[11px] whitespace-nowrap">78 DOM • 2 CUTS (-$24k)</span>
+                </div>
+                <div class="text-slate-500 mt-1.5">Foreclosure/Auction • 3 Bed / 2 Bath • 1,569 SqFt • Built 2004 • HOA $0/mo</div>
+                <div class="mt-3 pt-3 border-t border-slate-200 grid grid-cols-3 gap-2 mono">
+                  <div><span class="text-slate-400 block text-[10px]">ASKING PRICE</span><strong class="text-slate-900">$170,000</strong></div>
+                  <div><span class="text-slate-400 block text-[10px]">CONSERVATIVE ARV</span><strong class="text-emerald-700">$252,609 (+$82k)</strong></div>
+                  <div><span class="text-slate-400 block text-[10px]">HUD 3BR YIELD</span><strong class="text-blue-700">13.3% ($1,890/mo)</strong></div>
+                </div>
+              </div>
+
+              <div class="flex items-center justify-between text-[11px] text-slate-500 pt-1 px-1">
+                <span>70% MAO, Offer Script, Zillow Comps, County Tax &amp; Skip-Trace Inside</span>
+                <span class="font-semibold text-slate-800">38 Verified Fields</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- CRISP KPI STRIP -->
+      <div class="mt-14 bg-white border border-slate-200 rounded-2xl p-6 grid grid-cols-2 lg:grid-cols-4 gap-6 shadow-2xs">
+        <div class="lg:border-r lg:border-slate-200 lg:pr-6">
+          <div class="text-[11px] font-bold uppercase tracking-wider text-slate-400">Automated Coverage</div>
+          <div class="text-lg sm:text-2xl font-extrabold text-slate-900 mt-1">26 States • 100+ Metros</div>
+          <div class="text-xs text-slate-500 mt-1">3-layer multi-polygon MLS audit</div>
+        </div>
+        <div class="lg:border-r lg:border-slate-200 lg:pr-6">
+          <div class="text-[11px] font-bold uppercase tracking-wider text-slate-400">Global Territory Cap</div>
+          <div class="text-lg sm:text-2xl font-extrabold text-blue-600 mt-1" id="heroSeatsRemaining">-- / 72 Open</div>
+          <div class="text-xs text-slate-500 mt-1">Exclusive round-robin routing</div>
+        </div>
+        <div class="lg:border-r lg:border-slate-200 lg:pr-6">
+          <div class="text-[11px] font-bold uppercase tracking-wider text-slate-400">Executive Underwriting</div>
+          <div class="text-lg sm:text-2xl font-extrabold text-slate-900 mt-1">38 Data Columns</div>
+          <div class="text-xs text-slate-500 mt-1">Offer Script, Zillow, Tax &amp; 70% MAO</div>
+        </div>
+        <div>
+          <div class="text-[11px] font-bold uppercase tracking-wider text-slate-400">Profit Alignment</div>
+          <div class="text-lg sm:text-2xl font-extrabold text-emerald-600 mt-1">0% Success Fee</div>
+          <div class="text-xs text-slate-500 mt-1">$149/mo flat • Keep 100% profit</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- LIVE VERIFIED DEAL FEED + TRUST NOTICE -->
+  <section id="live-feed" class="py-16 lg:py-24 border-b border-slate-200 bg-white">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="flex flex-col md:flex-row md:items-end justify-between gap-4 mb-6">
+        <div>
+          <span class="text-xs font-bold uppercase tracking-wider text-blue-600">Live Production Telemetry</span>
+          <h2 class="text-2xl sm:text-3xl font-bold text-slate-900 mt-1">Top 1% Distressed &amp; Motivated Price-Drop Inventory</h2>
+          <p class="text-sm text-slate-600 mt-1.5">Dual-track filtering isolates both deep-equity flips (15%+ below median) and motivated price-drop / 45+ DOM sellers ready for cash offers.</p>
+        </div>
+        <div class="flex items-center gap-3">
+          <select id="stateFilter" onchange="renderDealsTable()" class="w-full sm:w-auto bg-white border border-slate-300 text-slate-800 text-sm font-semibold rounded-xl px-4 py-2.5 focus:outline-none focus:border-blue-600 shadow-2xs">
+            <option value="ALL">All Covered States</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- MANDATORY AUTHENTICITY & SECURITY NOTICE -->
+      <div class="mb-6 bg-blue-50/80 border border-blue-200 rounded-xl p-4 flex items-start sm:items-center gap-3.5 text-xs sm:text-sm text-slate-800">
+        <div class="w-8 h-8 rounded-lg bg-blue-600 text-white flex items-center justify-center shrink-0 mt-0.5 sm:mt-0">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/></svg>
+        </div>
+        <p class="leading-relaxed">
+          <strong class="font-bold text-slate-900">Subscriber Territory Protection:</strong> Street numbers are masked on the public feed. Full unmasked addresses, Ready-to-Send Cash Offer Scripts, Zillow Comps URLs, County Tax Assessor links, and Skip-Trace URLs unlock immediately inside your private Google Drive folder.
+        </p>
+      </div>
+
+      <div class="bg-white border border-slate-200 rounded-2xl overflow-hidden shadow-xs">
+        <div class="overflow-x-auto">
+          <table class="w-full text-left border-collapse">
+            <thead>
+              <tr class="bg-slate-50 border-b border-slate-200 text-[11px] font-bold uppercase tracking-wider text-slate-500 whitespace-nowrap">
+                <th class="py-3.5 px-4">Record ID</th>
+                <th class="py-3.5 px-4">Location &amp; Masked Street</th>
+                <th class="py-3.5 px-4">DOM &amp; Price-Drop History</th>
+                <th class="py-3.5 px-4">Property &amp; Layout</th>
+                <th class="py-3.5 px-4 text-right">Asking</th>
+                <th class="py-3.5 px-4 text-right">Conservative ARV</th>
+                <th class="py-3.5 px-4 text-right">Equity Spread</th>
+                <th class="py-3.5 px-4 text-right">HUD Yield</th>
+                <th class="py-3.5 px-4 text-center">Score</th>
+                <th class="py-3.5 px-4 text-right">Access</th>
+              </tr>
+            </thead>
+            <tbody id="dealsTableBody" class="divide-y divide-slate-200 text-xs sm:text-sm"></tbody>
+          </table>
+        </div>
+        <div class="bg-slate-50 px-4 py-3.5 border-t border-slate-200 flex flex-col sm:flex-row items-center justify-between gap-2 text-xs text-slate-500">
+          <span>Conservative ARV calculated at 0.92x live submarket $/SqFt median to prevent inflated estimates.</span>
+          <span class="font-semibold text-slate-700" id="feedCountLabel">Showing 12 active records</span>
+        </div>
+      </div>
+
+      <div class="mt-10 text-center">
+        <a href="#seat-allocation" class="inline-flex items-center justify-center bg-blue-600 hover:bg-blue-700 text-white font-bold px-8 py-4 rounded-xl text-sm sm:text-base transition shadow-md">
+          Unlock Your 38-Column Private Folder ($149/mo) →
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <!-- 4-STEP DELIVERY ARCHITECTURE WITH CRISP ICONS -->
+  <section id="how-it-works" class="py-16 lg:py-24 bg-slate-50 border-b border-slate-200">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="max-w-2xl mb-12">
+        <span class="text-xs font-bold uppercase tracking-wider text-blue-600">Replace Manual Comping &amp; Expensive VAs</span>
+        <h2 class="text-2xl sm:text-3xl font-bold text-slate-900 mt-1">How Our 3-Layer Quantitative Engine Audits Markets Every 15 Minutes</h2>
+        <p class="text-sm sm:text-base text-slate-600 mt-2">No software to configure. Our cloud pipeline continuously scans public MLS/Redfin inventory, isolates motivated &amp; deep-equity outliers, and routes offer-ready dossiers into your Google Drive.</p>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        <div class="bg-white border border-slate-200 rounded-2xl p-6 shadow-2xs">
+          <div class="flex items-center justify-between">
+            <span class="w-9 h-9 rounded-lg bg-blue-50 text-blue-700 font-bold text-xs flex items-center justify-center mono">01</span>
+            <div class="w-10 h-10 rounded-xl bg-slate-900 text-white flex items-center justify-center">
+              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+            </div>
+          </div>
+          <h3 class="text-base font-bold text-slate-900 mt-5">3-Layer Multi-Polygon Scan</h3>
+          <p class="text-xs sm:text-sm text-slate-600 mt-2 leading-relaxed">Audits up to 1,050 listings per city across 4 geographic quadrants every 15 minutes, filtering out 99% of retail noise to isolate top 1% opportunities.</p>
+        </div>
+
+        <div class="bg-white border border-slate-200 rounded-2xl p-6 shadow-2xs">
+          <div class="flex items-center justify-between">
+            <span class="w-9 h-9 rounded-lg bg-blue-50 text-blue-700 font-bold text-xs flex items-center justify-center mono">02</span>
+            <div class="w-10 h-10 rounded-xl bg-slate-900 text-white flex items-center justify-center">
+              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 17h8m0 0V9m0 8l-8-8-4 4-6-6"/></svg>
+            </div>
+          </div>
+          <h3 class="text-base font-bold text-slate-900 mt-5">Dual-Track Seller Detection</h3>
+          <p class="text-xs sm:text-sm text-slate-600 mt-2 leading-relaxed">Flags both 15%+ deep-equity flips and motivated sellers with verified MLS price cuts or 45+ Days on Market (DOM), paired with official HUD FMR rents.</p>
+        </div>
+
+        <div class="bg-white border border-slate-200 rounded-2xl p-6 shadow-2xs">
+          <div class="flex items-center justify-between">
+            <span class="w-9 h-9 rounded-lg bg-blue-50 text-blue-700 font-bold text-xs flex items-center justify-center mono">03</span>
+            <div class="w-10 h-10 rounded-xl bg-slate-900 text-white flex items-center justify-center">
+              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z"/></svg>
+            </div>
+          </div>
+          <h3 class="text-base font-bold text-slate-900 mt-5">70% MAO &amp; Offer Script</h3>
+          <p class="text-xs sm:text-sm text-slate-600 mt-2 leading-relaxed">Auto-calculates 70% ARV MAO, rehab tiers, net flip profit, and generates a personalized Cash Offer Pitch Script ready to copy-paste to listing agents.</p>
+        </div>
+
+        <div class="bg-white border border-slate-200 rounded-2xl p-6 shadow-2xs">
+          <div class="flex items-center justify-between">
+            <span class="w-9 h-9 rounded-lg bg-blue-50 text-blue-700 font-bold text-xs flex items-center justify-center mono">04</span>
+            <div class="w-10 h-10 rounded-xl bg-slate-900 text-white flex items-center justify-center">
+              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
+            </div>
+          </div>
+          <h3 class="text-base font-bold text-slate-900 mt-5">1-Click Due Diligence Links</h3>
+          <p class="text-xs sm:text-sm text-slate-600 mt-2 leading-relaxed">Every row in your private 38-column Google Drive workbook includes direct links to Redfin MLS, Zillow Comps, County Tax Assessor records, and Skip-Trace.</p>
+        </div>
+      </div>
+
+      <div class="mt-12 text-center">
+        <a href="#seat-allocation" class="inline-flex items-center justify-center bg-emerald-600 hover:bg-emerald-700 text-white font-bold px-8 py-4 rounded-xl text-sm sm:text-base transition shadow-md">
+          Claim Your State Now ($149/mo) →
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <!-- INTERACTIVE 70% ARV RULE & EDITABLE DEAL UNDERWRITING CALCULATOR -->
+  <section id="underwriting" class="py-16 lg:py-24 bg-white border-b border-slate-200">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-10 items-start">
+        <div class="lg:col-span-5 space-y-5">
+          <span class="text-xs font-bold uppercase tracking-wider text-blue-600">Standard U.S. Investor Math</span>
+          <h2 class="text-2xl sm:text-3xl font-bold text-slate-900">Interactive 70% ARV Rule &amp; Editable Deal Simulator</h2>
+          <p class="text-sm sm:text-base text-slate-600 leading-relaxed">
+            Test any deal against your own acquisition criteria. Adjust the <strong>Asking Price</strong>, <strong>Conservative ARV</strong>, <strong>Estimated Rehab Cost</strong>, or <strong>Closing &amp; Holding Cost %</strong> below to calculate your exact Maximum Allowable Offer (<code class="mono text-xs bg-slate-100 px-1.5 py-0.5 rounded">MAO = ARV × 70% − Rehab</code>) and conservative net flip profit.
+          </p>
+
+          <!-- TRANSPARENT UNDERWRITING METHODOLOGY NOTE -->
+          <div class="bg-slate-50 border border-slate-200 rounded-2xl p-5 space-y-2.5 text-xs text-slate-700 leading-relaxed">
+            <div class="font-bold text-slate-900 uppercase tracking-wider text-[11px] flex items-center gap-1.5">
+              <span class="w-2 h-2 rounded-full bg-blue-600"></span>
+              Underwriting Methodology Note
+            </div>
+            <p><strong>1. Conservative ARV:</strong> Derived from live submarket $/SqFt medians with a <strong>0.92x (8%) conservative haircut</strong> so distressed properties are never over-valued.</p>
+            <p><strong>2. Standard 70% ARV Rule:</strong> <span class="mono">MAO = (ARV × 0.70) − Rehab Cost</span>. Gives flippers and wholesalers a built-in 30% margin buffer for profit, financing, and closing friction.</p>
+            <p><strong>3. Net Flip Profit &amp; ROI:</strong> <span class="mono">Net Profit = ARV − Purchase Price − Rehab Cost − Closing/Holding Costs</span> (default 9% combined buy/sell/holding allowance; fully editable on the right).</p>
+          </div>
+        </div>
+
+        <div class="lg:col-span-7">
+          <div class="bg-slate-50 border border-slate-200 rounded-2xl p-6 sm:p-8 shadow-2xs">
+            <div class="flex flex-wrap items-center justify-between gap-2 pb-4 border-b border-slate-200">
+              <div>
+                <span class="text-xs sm:text-sm font-bold text-slate-900">Sample Benchmark: Jacksonville, FL 32210 • 3 Bed / 2 Bath • 1,569 SqFt</span>
+                <span class="block text-xs text-slate-500 mt-0.5">78 DOM • 2 Price Cuts (-$24,000) • HUD 3BR FMR: $1,890/mo</span>
+              </div>
+              <button type="button" onclick="resetEditableCalc()" class="text-xs font-semibold text-blue-600 hover:underline">
+                Reset Defaults
+              </button>
+            </div>
+
+            <!-- QUICK REHAB SCOPE PRESETS -->
+            <div class="mt-5">
+              <label class="block text-xs font-bold text-slate-700 mb-2">Quick Rehab Scope Presets (or enter custom dollar amounts below):</label>
+              <div class="grid grid-cols-2 sm:grid-cols-5 gap-2">
+                <button type="button" onclick="applyRehabPreset(0)" data-pct="0" class="rehab-btn bg-white border border-slate-300 text-slate-700 hover:bg-slate-100 font-semibold py-2 px-2.5 rounded-lg text-xs transition">0% Turnkey</button>
+                <button type="button" onclick="applyRehabPreset(4)" data-pct="4" class="rehab-btn bg-white border border-slate-300 text-slate-700 hover:bg-slate-100 font-semibold py-2 px-2.5 rounded-lg text-xs transition">4% Cosmetic</button>
+                <button type="button" onclick="applyRehabPreset(14)" data-pct="14" class="rehab-btn bg-slate-900 text-white font-semibold py-2 px-2.5 rounded-lg text-xs transition">14% Light (Default)</button>
+                <button type="button" onclick="applyRehabPreset(23)" data-pct="23" class="rehab-btn bg-white border border-slate-300 text-slate-700 hover:bg-slate-100 font-semibold py-2 px-2.5 rounded-lg text-xs transition">23% Moderate</button>
+                <button type="button" onclick="applyRehabPreset(35)" data-pct="35" class="rehab-btn bg-white border border-slate-300 text-slate-700 hover:bg-slate-100 font-semibold py-2 px-2.5 rounded-lg text-xs transition">35% Heavy Gut</button>
+              </div>
+            </div>
+
+            <!-- EDITABLE USER INPUTS -->
+            <div class="mt-5 grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div>
+                <label class="block text-[11px] font-bold uppercase tracking-wider text-slate-600 mb-1">Asking / Offer Price ($)</label>
+                <input type="number" id="inputAsking" value="155000" step="1000" oninput="recalculateCustomDeal()" class="w-full bg-white border border-slate-300 rounded-xl px-3.5 py-2.5 text-sm font-bold text-slate-900 mono focus:border-blue-600 focus:outline-none" />
+              </div>
+              <div>
+                <label class="block text-[11px] font-bold uppercase tracking-wider text-slate-600 mb-1">Conservative ARV ($)</label>
+                <input type="number" id="inputArv" value="274260" step="1000" oninput="recalculateCustomDeal()" class="w-full bg-white border border-slate-300 rounded-xl px-3.5 py-2.5 text-sm font-bold text-slate-900 mono focus:border-blue-600 focus:outline-none" />
+              </div>
+              <div>
+                <label class="block text-[11px] font-bold uppercase tracking-wider text-slate-600 mb-1">Estimated Rehab Cost ($)</label>
+                <input type="number" id="inputRehab" value="38396" step="500" oninput="recalculateCustomDeal()" class="w-full bg-white border border-slate-300 rounded-xl px-3.5 py-2.5 text-sm font-bold text-slate-900 mono focus:border-blue-600 focus:outline-none" />
+              </div>
+              <div>
+                <label class="block text-[11px] font-bold uppercase tracking-wider text-slate-600 mb-1">Closing &amp; Holding Cost (% of ARV)</label>
+                <input type="number" id="inputClosingPct" value="9" step="0.5" min="0" max="25" oninput="recalculateCustomDeal()" class="w-full bg-white border border-slate-300 rounded-xl px-3.5 py-2.5 text-sm font-bold text-slate-900 mono focus:border-blue-600 focus:outline-none" />
+              </div>
+            </div>
+
+            <!-- LIVE OUTPUT CARDS -->
+            <div class="mt-6 grid grid-cols-2 sm:grid-cols-4 gap-3">
+              <div class="bg-blue-50/90 border border-blue-200 rounded-xl p-3.5">
+                <div class="text-[11px] font-semibold text-blue-900">70% Rule MAO</div>
+                <div id="calcMao" class="text-base sm:text-lg font-extrabold text-blue-700 mono mt-1">$153,586</div>
+                <div class="text-[10px] text-blue-700/80 mt-0.5">(ARV × 70%) − Rehab</div>
+              </div>
+              <div class="bg-white border border-slate-200 rounded-xl p-3.5">
+                <div class="text-[11px] text-slate-500">Closing &amp; Holding</div>
+                <div id="calcClosingCost" class="text-base sm:text-lg font-bold text-slate-900 mono mt-1">$24,683</div>
+                <div id="calcClosingSub" class="text-[10px] text-slate-400 mt-0.5">9.0% of ARV</div>
+              </div>
+              <div class="bg-white border border-slate-200 rounded-xl p-3.5">
+                <div class="text-[11px] text-slate-500">Conservative Net Profit</div>
+                <div id="calcNetProfit" class="text-base sm:text-lg font-bold text-emerald-600 mono mt-1">$56,181</div>
+                <div class="text-[10px] text-slate-400 mt-0.5">After all costs</div>
+              </div>
+              <div class="bg-white border border-slate-200 rounded-xl p-3.5">
+                <div class="text-[11px] text-slate-500">Cash-on-Cost ROI</div>
+                <div id="calcRoi" class="text-base sm:text-lg font-bold text-emerald-600 mono mt-1">29.1%</div>
+                <div class="text-[10px] text-slate-400 mt-0.5">Net / (Buy + Rehab)</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 1. TRANSPARENT FLAT PRICING SECTION ($149/MO • 0% SUCCESS FEE) -->
+  <section id="pricing-alignment" class="py-16 lg:py-24 bg-emerald-50/60 border-b border-emerald-200">
+    <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="text-center max-w-2xl mx-auto mb-10">
+        <span class="text-xs font-bold uppercase tracking-wider text-emerald-700">Simple Flat Licensing • Zero Profit Sharing</span>
+        <h2 class="text-2xl sm:text-4xl font-extrabold text-slate-900 mt-1">Institutional Underwriting at a Flat $149/Month</h2>
+        <p class="text-sm sm:text-base text-slate-600 mt-2">Save 40+ hours a month of manual MLS comping and VA overhead without giving up a single dollar of your deal equity.</p>
+      </div>
+
+      <div class="bg-white border-2 border-emerald-600/30 rounded-3xl p-7 sm:p-10 shadow-xl shadow-emerald-950/5">
+        <div class="flex flex-col md:flex-row md:items-center justify-between gap-6 pb-8 border-b border-slate-200">
+          <div>
+            <span class="inline-block px-3 py-1 rounded-full bg-slate-900 text-white text-xs font-bold uppercase tracking-wider mb-3">
+              Exclusive State Territory Seat • 38-Col Suite
+            </span>
+            <div class="flex items-baseline gap-2">
+              <span class="text-4xl sm:text-5xl font-extrabold text-slate-900 mono">$149</span>
+              <span class="text-base sm:text-lg font-bold text-slate-600">/month flat per state</span>
+            </div>
+            <p class="text-xs sm:text-sm text-slate-500 mt-2">
+              Includes 120–250+ pre-underwritten deals/month, private Google Drive CRM, Ready-to-Send Cash Offer Scripts, Zillow Comps, County Tax links, Skip-Trace URLs &amp; 15-min live updates.
+            </p>
+          </div>
+
+          <div class="flex flex-col items-stretch sm:items-end shrink-0">
+            <a href="#seat-allocation" class="text-center bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-4 px-8 rounded-xl text-sm sm:text-base transition shadow-lg shadow-emerald-600/20">
+              Claim Your State ($149/mo) →
+            </a>
+            <span class="text-[11px] text-slate-500 text-center sm:text-right mt-2">256-bit SSL Secure Checkout • No Long-Term Lock-In</span>
+          </div>
+        </div>
+
+        <!-- 0% SUCCESS FEE CALLOUT BOX -->
+        <div class="mt-8 bg-emerald-900 text-white rounded-2xl p-6 sm:p-7 border border-emerald-700 shadow-inner">
+          <div class="flex items-start gap-4">
+            <div class="w-10 h-10 rounded-xl bg-emerald-500/20 border border-emerald-400/40 text-emerald-300 flex items-center justify-center shrink-0 mt-0.5">
+              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg>
+            </div>
+            <p class="text-sm sm:text-base leading-relaxed text-emerald-50">
+              <strong class="text-white font-extrabold">0% Success Fee — You keep 100% of your deal profits:</strong> No equity splits, no closing fees, and no long-term contracts. You pay a predictable $149/month flat software &amp; data license, and every dollar you make from wholesale assignments, flips, or Section-8 holds belongs 100% to you.
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- HIGH-SCARCITY 72-SEAT TERRITORY BOARD (FOMO) -->
+  <section id="seat-allocation" class="py-16 lg:py-24 bg-slate-900 text-white border-b border-slate-800">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="bg-slate-800/80 border border-slate-700 rounded-2xl p-6 sm:p-8 mb-10">
+        <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-6">
+          <div class="max-w-2xl">
+            <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-rose-500/15 border border-rose-500/30 text-rose-300 text-xs font-bold uppercase tracking-wider mb-3">
+              <span class="w-2 h-2 rounded-full bg-rose-400 animate-ping"></span>
+              Strict Territory Exclusivity Lock
+            </div>
+            <h2 class="text-2xl sm:text-4xl font-extrabold text-white tracking-tight">Live 72-Seat Territory Board (26 U.S. States)</h2>
+            <p class="text-sm sm:text-base text-slate-300 mt-2.5 leading-relaxed">
+              <strong class="text-white">Seats are strictly capped at 72 globally so subscribers never compete on the same routed feed.</strong> Each state cap is mathematically locked to monthly deal volume so every seat holder receives 120–250+ unshared top 1% deals/month.
+            </p>
+          </div>
+
+          <div class="bg-slate-950 border border-slate-700 rounded-xl p-4 sm:p-5 shrink-0 text-center min-w-[240px]">
+            <span class="text-[11px] font-bold uppercase tracking-wider text-slate-400 block">Current Allocation Window Closes In</span>
+            <div id="scarcityCountdown" class="text-2xl sm:text-3xl font-extrabold text-emerald-400 mono mt-1.5">03:42:19</div>
+            <span class="text-[11px] text-slate-400 block mt-1">$149/mo Flat • 0% Success Fee</span>
+          </div>
+        </div>
+      </div>
+
+      <div id="seatsGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4"></div>
+    </div>
+  </section>
+
+  <!-- 2. "ABOUT THE FOUNDER" SECTION -->
+  <section id="founder" class="py-16 lg:py-24 bg-white border-b border-slate-200">
+    <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="bg-slate-50 border border-slate-200 rounded-3xl p-7 sm:p-10 lg:p-12 shadow-xs">
+        <div class="grid grid-cols-1 md:grid-cols-12 gap-8 items-center">
+          <div class="md:col-span-4 flex flex-col items-center text-center">
+            <div class="w-44 h-44 sm:w-48 sm:h-48 rounded-2xl bg-slate-900 border-4 border-white shadow-xl flex flex-col items-center justify-center text-slate-300 relative overflow-hidden">
+              <img src="founder.png" alt="Md. Nayeem Biswas" class="w-full h-full object-cover object-top" />
+            </div>
+            <div class="mt-4">
+              <div class="font-extrabold text-slate-900 text-lg">Md. Nayeem Biswas</div>
+              <div class="text-xs font-bold text-blue-600 uppercase tracking-wider mt-0.5">Founder &amp; Lead Quantitative Researcher</div>
+            </div>
+          </div>
+
+          <div class="md:col-span-8 space-y-4">
+            <span class="inline-block text-xs font-bold uppercase tracking-wider text-blue-600">About the Founder</span>
+            <h2 class="text-2xl sm:text-3xl font-bold text-slate-900">Built by a Data Engineer to Eliminate Manual MLS Comping</h2>
+            <blockquote class="text-sm sm:text-base text-slate-700 leading-relaxed bg-white border-l-4 border-emerald-600 p-5 rounded-r-xl shadow-2xs">
+              "I built Upstream Deal Sourcing Operations because I saw active investors burning thousands of dollars on VAs and wasting hours manually sifting through retail MLS noise. Our automated quantitative underwriting engine scans 100+ public markets every 15 minutes to isolate the top 1% price-dropped, fatigued, and deep-equity deals—giving you clean, conservative numbers and ready-to-send offer scripts so you can focus strictly on making offers and closing."
+            </blockquote>
+            <div class="pt-2 flex flex-wrap items-center gap-4">
+              <a href="mailto:nayeembiswas440@gmail.com?subject=Question%20for%20Md.%20Nayeem%20Biswas%20-%20Upstream%20Deal%20Sourcing" class="inline-flex items-center gap-2 bg-slate-900 hover:bg-slate-800 text-white font-bold px-6 py-3.5 rounded-xl text-xs sm:text-sm transition shadow-sm">
+                <svg class="w-4 h-4 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>
+                Talk to the Founder
+              </a>
+              <span class="text-xs text-slate-500">Direct email: <strong class="text-slate-700">nayeembiswas440@gmail.com</strong></span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- LEAD CAPTURE: NOT READY TO SUBSCRIBE? GET FREE SAMPLE DOSSIER -->
+  <section id="free-sample" class="py-16 lg:py-20 bg-slate-50 border-b border-slate-200">
+    <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="bg-white border border-slate-200 rounded-2xl p-6 sm:p-10 shadow-xs">
+        <div class="text-center max-w-2xl mx-auto">
+          <span class="text-xs font-bold uppercase tracking-wider text-blue-600">Inspect Our Underwriting First</span>
+          <h2 class="text-2xl sm:text-3xl font-bold text-slate-900 mt-1">Not ready to subscribe? Get an Executive 26-Column Sample Dossier</h2>
+          <p class="text-sm text-slate-600 mt-2">Enter your valid investor or business email below to immediately download a full quantitative underwriting dossier complete with <strong>70% ARV MAO</strong>, <strong>Net Flip Profit</strong>, <strong>Cash-on-Cost ROI</strong>, <strong>HUD Rental Yields</strong>, and a <strong>Ready-to-Send Cash Offer Script</strong>.</p>
+        </div>
+
+        <form onsubmit="submitSampleLead(event)" novalidate class="mt-7 max-w-xl mx-auto flex flex-col sm:flex-row gap-3">
+          <input type="email" id="sampleLeadEmail" required placeholder="Enter valid work email (e.g. name@company.com)..." class="flex-1 bg-white border border-slate-300 rounded-xl px-4 py-3.5 text-sm text-slate-900 focus:border-blue-600 focus:outline-none" />
+          <select id="sampleLeadState" class="bg-white border border-slate-300 rounded-xl px-3.5 py-3.5 text-sm font-semibold text-slate-800 focus:border-blue-600 focus:outline-none">
+            <option value="FL">Florida (FL)</option>
+            <option value="TX">Texas (TX)</option>
+            <option value="OH">Ohio (OH)</option>
+            <option value="NC">North Carolina (NC)</option>
+            <option value="GA">Georgia (GA)</option>
+            <option value="TN">Tennessee (TN)</option>
+            <option value="OTHER">Other U.S. State</option>
+          </select>
+          <button type="submit" id="sampleLeadBtn" class="bg-slate-900 hover:bg-slate-800 text-white font-bold px-6 py-3.5 rounded-xl text-sm transition whitespace-nowrap">
+            Download Dossier →
+          </button>
+        </form>
+        <p id="sampleLeadError" class="hidden text-center text-xs sm:text-sm font-semibold text-rose-600 mt-3"></p>
+        <p id="sampleLeadSuccess" class="hidden text-center text-xs sm:text-sm font-semibold text-emerald-700 mt-4">
+          ✓ Executive 26-Column Sample Dossier downloaded! Check your downloads folder to inspect the 70% ARV MAO, Net Profit, ROI, and Cash Offer Script columns.
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <!-- 3. UPDATED "FREQUENTLY ASKED QUESTIONS (FAQ)" SECTION -->
+  <section id="faq" class="py-16 lg:py-20 bg-white border-b border-slate-200">
+    <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="text-center mb-10">
+        <span class="text-xs font-bold uppercase tracking-wider text-blue-600">Investor Transparency</span>
+        <h2 class="text-2xl sm:text-3xl font-bold text-slate-900 mt-1">Frequently Asked Questions (FAQ)</h2>
+      </div>
+      <div class="space-y-4">
+        <div class="p-6 rounded-2xl border border-slate-200 bg-slate-50/70">
+          <h3 class="text-sm sm:text-base font-bold text-slate-900">Q: Where does the property data come from?</h3>
+          <p class="text-xs sm:text-sm text-slate-700 mt-2 leading-relaxed">
+            <strong>A:</strong> Our 3-Layer Automated Quantitative Underwriting Engine continuously scans live public MLS and Redfin market feeds across 100+ U.S. metros every 15 minutes, filtering out 99% of retail listings to isolate both deep-equity (15%+ below median) and motivated price-drop / 45+ DOM opportunities.
+          </p>
+        </div>
+        <div class="p-6 rounded-2xl border border-slate-200 bg-slate-50/70">
+          <h3 class="text-sm sm:text-base font-bold text-slate-900">Q: Do you take any percentage or success fee when I close a deal?</h3>
+          <p class="text-xs sm:text-sm text-slate-700 mt-2 leading-relaxed">
+            <strong>A:</strong> No. 0% Success Fee — you keep 100% of your deal profits. You only pay the flat $149/month territory subscription with no long-term lock-in.
+          </p>
+        </div>
+        <div class="p-6 rounded-2xl border border-slate-200 bg-slate-50/70">
+          <h3 class="text-sm sm:text-base font-bold text-slate-900">Q: How is this different from PropStream, BatchLeads, or hiring a VA?</h3>
+          <p class="text-xs sm:text-sm text-slate-700 mt-2 leading-relaxed">
+            <strong>A:</strong> DIY tools still require you or an expensive VA to spend hours pulling lists, running comps, checking Zillow &amp; county tax records, and drafting offers. Our 38-column suite automates the entire workflow—including ready-to-send Cash Offer Scripts—directly in your Google Drive.
+          </p>
+        </div>
+        <div class="p-6 rounded-2xl border border-slate-200 bg-slate-50/70">
+          <h3 class="text-sm sm:text-base font-bold text-slate-900">Q: Do I need a real estate license, and can I cancel anytime?</h3>
+          <p class="text-xs sm:text-sm text-slate-700 mt-2 leading-relaxed">
+            <strong>A:</strong> No real estate license is needed—this is strictly a B2B quantitative data &amp; underwriting software service. There are no long-term contracts, and you can cancel anytime with a 30-day written notice.
+          </p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 5. DIRECT FOUNDER CONTACT + PARTNER REFERRAL SECTION -->
+  <section id="contact" class="py-14 bg-slate-50 border-b border-slate-200">
+    <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 space-y-6">
+      <div class="bg-white border border-slate-200 rounded-2xl p-6 sm:p-8 flex flex-col md:flex-row items-center justify-between gap-6 shadow-2xs">
+        <div>
+          <span class="text-xs font-bold uppercase tracking-wider text-blue-600">Direct Executive Desk</span>
+          <h3 class="text-lg sm:text-xl font-bold text-slate-900 mt-1">Have questions about multi-state territories or custom underwriting criteria?</h3>
+          <p class="text-xs sm:text-sm text-slate-600 mt-1">Reach out directly to Founder &amp; Lead Quantitative Researcher Md. Nayeem Biswas before locking your seat.</p>
+        </div>
+        <a href="mailto:nayeembiswas440@gmail.com?subject=Territory%20Consultation%20-%20Upstream%20Deal%20Sourcing" class="shrink-0 inline-flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white font-bold px-6 py-3.5 rounded-xl text-xs sm:text-sm transition shadow-md">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>
+          Talk to the Founder
+        </a>
+      </div>
+
+      <div class="bg-slate-900 text-white rounded-2xl p-6 sm:p-8 flex flex-col md:flex-row items-center justify-between gap-6">
+        <div>
+          <span class="text-xs font-bold uppercase tracking-wider text-emerald-400">Investor Partner Program</span>
+          <h3 class="text-lg sm:text-xl font-bold mt-1">Know an active investor? Refer them and get $50 cash or 1 month free.</h3>
+          <p class="text-xs sm:text-sm text-slate-300 mt-1">Generate your personal tracking link below. When an investor books through your link, your email is automatically attached to their seat record.</p>
+        </div>
+        <button type="button" id="copyRefLinkBtn" onclick="copyReferralLink()" class="shrink-0 bg-emerald-600 hover:bg-emerald-500 text-white font-bold px-6 py-3.5 rounded-xl text-xs sm:text-sm transition shadow-md">
+          Generate &amp; Copy Referral Link
+        </button>
+      </div>
+    </div>
+  </section>
+
+  <!-- 4. FOOTER WITH EXACT LEGAL DISCLAIMER -->
+  <footer class="bg-white py-10 pb-24 sm:pb-12 text-xs text-slate-500">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-6">
+      <div class="flex flex-col sm:flex-row items-center justify-between gap-4 pb-6 border-b border-slate-200">
+        <div>
+          <span class="font-bold text-slate-900 text-sm">Upstream Deal Sourcing Operations</span>
+          <span class="block text-slate-500 mt-0.5">Automated Quantitative MLS &amp; Public Market Underwriting Engine • Founded by Md. Nayeem Biswas</span>
+        </div>
+        <div class="flex items-center gap-4">
+          <a href="mailto:nayeembiswas440@gmail.com" class="font-semibold text-blue-600 hover:underline">nayeembiswas440@gmail.com</a>
+          <span>•</span>
+          <a href="#seat-allocation" class="font-semibold text-slate-800 hover:underline">72-Seat Board</a>
+        </div>
+      </div>
+
+      <p class="text-center text-xs text-slate-500 leading-relaxed max-w-4xl mx-auto">
+        Algorithmic underwriting data and public market property analytics are provided strictly for independent investor research purposes; not a licensed real estate brokerage.
+      </p>
+    </div>
+  </footer>
+
+  <!-- RESERVATION & MULTI-GATEWAY CHECKOUT MODAL -->
+  <div id="bookingModal" class="fixed inset-0 z-50 hidden bg-slate-900/70 backdrop-blur-xs flex items-center justify-center p-4 overflow-y-auto">
+    <div class="bg-white border border-slate-200 rounded-2xl max-w-lg w-full p-6 sm:p-7 relative shadow-2xl my-8">
+      <button onclick="closeModal()" class="absolute top-4 right-4 text-slate-400 hover:text-slate-700 text-lg font-bold">✕</button>
+
+      <div id="modalStepForm">
+        <span class="text-xs font-bold uppercase tracking-wider text-emerald-600">B2B Territory License • Step 1 of 2</span>
+        <h3 class="text-xl font-bold text-slate-900 mt-1">Claim Seat: <span id="modalStateTitle" class="text-blue-600">Florida (FL)</span></h3>
+        <p class="text-xs text-slate-500 mt-1" id="modalCitiesSubtitle">Covers 16 liquidity cities • Exclusive round-robin allocation</p>
+
+        <div class="mt-4 grid grid-cols-3 gap-2 bg-slate-50 border border-slate-200 rounded-xl p-2.5 text-[10px] sm:text-[11px] font-semibold text-slate-700 text-center">
+          <div class="flex flex-col items-center justify-center gap-1">
+            <svg class="w-4 h-4 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/></svg>
+            <span>256-bit SSL Secure</span>
+          </div>
+          <div class="flex flex-col items-center justify-center gap-1 border-x border-slate-200 px-1">
+            <svg class="w-4 h-4 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+            <span>0% Success Fee</span>
+          </div>
+          <div class="flex flex-col items-center justify-center gap-1">
+            <svg class="w-4 h-4 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
+            <span>No Lock-In</span>
+          </div>
+        </div>
+
+        <form onsubmit="submitReservation(event)" class="mt-4 space-y-3.5">
+          <div>
+            <label class="block text-xs font-semibold text-slate-700 mb-1">Full Name or Entity / LLC Name *</label>
+            <input type="text" id="clientName" required placeholder="e.g. Apex Acquisitions LLC" class="w-full bg-white border border-slate-300 rounded-lg px-3.5 py-2.5 text-sm text-slate-900 focus:border-blue-600 focus:outline-none" />
+          </div>
+          <div>
+            <label class="block text-xs font-semibold text-slate-700 mb-1">Google Drive Delivery Email *</label>
+            <input type="email" id="clientEmail" required placeholder="acquisitions@yourcompany.com" class="w-full bg-white border border-slate-300 rounded-lg px-3.5 py-2.5 text-sm text-slate-900 focus:border-blue-600 focus:outline-none" />
+          </div>
+          <div>
+            <label class="block text-xs font-semibold text-slate-700 mb-1">Direct Phone / WhatsApp (For Instant Folder Unlock)</label>
+            <input type="text" id="clientPhone" placeholder="+1 (555) 234-5678" class="w-full bg-white border border-slate-300 rounded-lg px-3.5 py-2.5 text-sm text-slate-900 focus:border-blue-600 focus:outline-none" />
+          </div>
+          <div>
+            <label class="block text-xs font-semibold text-slate-700 mb-1">Select Payment Method ($149.00 / month flat)</label>
+            <select id="paymentMethod" class="w-full bg-white border border-slate-300 rounded-lg px-3.5 py-2.5 text-sm text-slate-900 font-medium focus:border-blue-600 focus:outline-none">
+              <option value="REMITLY">Debit / Credit Card or Bank (Instant via Remitly Pay)</option>
+              <option value="CRYPTO">Crypto — USDT / USDC (BNB Smart Chain BEP20)</option>
+              <option value="ACH">U.S. Bank ACH / Domestic Wire (JP Morgan Chase NA)</option>
+            </select>
+          </div>
+          <div>
+            <label class="block text-xs font-semibold text-slate-700 mb-1">Referred By (Partner Email — Optional)</label>
+            <input type="text" id="referredBy" placeholder="partner@company.com (if referred)" class="w-full bg-slate-50 border border-slate-300 rounded-lg px-3.5 py-2 text-xs text-slate-800 focus:border-blue-600 focus:outline-none" />
+          </div>
+          <button type="submit" id="submitSeatBtn" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-3.5 rounded-xl text-sm transition shadow-md">
+            Continue to Secure Checkout ($149/mo Flat) →
+          </button>
+          <p class="text-[11px] text-slate-500 text-center">0% Success Fee — You keep 100% of your deal profits. Cancel anytime.</p>
+        </form>
+      </div>
+
+      <!-- STEP 2: DYNAMIC PAYMENT INSTRUCTIONS + PAYMENT PROOF SUBMISSION -->
+      <div id="modalStepInvoice" class="hidden">
+        <div class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs font-semibold mb-3">
+          ✓ Territory Seat Held for 24 Hours
+        </div>
+        <h3 class="text-xl font-bold text-slate-900">Complete Your $149 Activation</h3>
+        <p class="text-xs text-slate-500 mt-1">Invoice Ref: <strong id="invoiceRef" class="text-slate-900 mono">INV-FL-1024</strong> • Include this reference when sending payment.</p>
+
+        <div class="mt-4 grid grid-cols-3 gap-1.5 bg-slate-100 p-1 rounded-lg text-xs font-semibold">
+          <button type="button" onclick="switchPaymentTab('REMITLY')" id="tabREMITLY" class="py-1.5 rounded-md bg-white text-slate-900 shadow-2xs">Card / Remitly</button>
+          <button type="button" onclick="switchPaymentTab('CRYPTO')" id="tabCRYPTO" class="py-1.5 rounded-md text-slate-600 hover:text-slate-900">Crypto (BEP20)</button>
+          <button type="button" onclick="switchPaymentTab('ACH')" id="tabACH" class="py-1.5 rounded-md text-slate-600 hover:text-slate-900">U.S. Bank ACH</button>
+        </div>
+
+        <div id="boxREMITLY" class="mt-4 bg-slate-50 border border-slate-200 rounded-xl p-4 space-y-3 text-xs">
+          <p class="text-slate-600 leading-relaxed">Pay <strong class="text-slate-900">$149.00 USD</strong> securely using your U.S. Debit Card, Credit Card, or Bank Account via our verified Remitly Pay link:</p>
+          <div class="bg-white border border-slate-200 rounded-lg p-3 flex items-center justify-between">
+            <div>
+              <span class="text-[10px] text-slate-400 uppercase block">Verified Recipient</span>
+              <strong class="text-slate-900">Md Nayeem Biswas (@mdnayeemb8050)</strong>
+            </div>
+            <span class="font-bold text-emerald-700 mono">$149.00</span>
+          </div>
+          <a id="remitlyDirectLink" href="https://remit.ly/pay/mdnayeemb8050" target="_blank" class="block w-full text-center bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-3 rounded-lg text-sm transition shadow-xs">
+            Pay $149.00 via Remitly Now ↗
+          </a>
+          <p class="text-[11px] text-slate-500 text-center">Add Memo: <strong id="remitlyMemo" class="mono text-slate-800"></strong></p>
+        </div>
+
+        <div id="boxCRYPTO" class="hidden mt-4 bg-slate-50 border border-slate-200 rounded-xl p-4 space-y-3 text-xs">
+          <div class="flex items-center justify-between">
+            <span class="font-bold text-slate-900">Send Exact Amount: 149.00 USDT / USDC</span>
+            <span class="px-2 py-0.5 rounded bg-amber-100 text-amber-900 font-bold text-[10px]">BNB SMART CHAIN (BEP20)</span>
+          </div>
+          <div class="bg-white border border-slate-200 rounded-lg p-3">
+            <span class="text-[10px] text-slate-400 uppercase block mb-1">BEP20 Deposit Address</span>
+            <div class="mono text-[11px] font-bold text-slate-900 break-all select-all" id="cryptoAddrText">0x596d0AC8c79cbCC4e4e22A75B5E4E3c4dDf32d6F</div>
+          </div>
+          <div class="p-2.5 rounded-lg bg-amber-50 border border-amber-200 text-amber-900 text-[11px]">
+            <strong>Important:</strong> Select <strong>BNB Smart Chain (BEP20)</strong> network only when sending USDT or USDC. Instant folder activation upon blockchain confirmation.
+          </div>
+          <button type="button" id="copyCryptoBtn" onclick="copyCryptoAddress()" class="w-full bg-slate-900 hover:bg-slate-800 text-white font-semibold py-2.5 rounded-lg text-xs transition">
+            Copy BEP20 Wallet Address
+          </button>
+        </div>
+
+        <div id="boxACH" class="hidden mt-4 bg-slate-50 border border-slate-200 rounded-xl p-4 space-y-2 text-xs">
+          <div class="flex justify-between"><span class="text-slate-500">Beneficiary Name:</span><span class="text-slate-900 font-semibold" id="invBeneficiary"></span></div>
+          <div class="flex justify-between"><span class="text-slate-500">U.S. Bank Name:</span><span class="text-slate-900 font-medium" id="invBank"></span></div>
+          <div class="flex justify-between"><span class="text-slate-500">Bank Address:</span><span class="text-slate-700 text-right" id="invBankAddr"></span></div>
+          <div class="flex justify-between"><span class="text-slate-500">Routing Number (ACH):</span><span class="text-blue-700 mono font-bold" id="invRouting"></span></div>
+          <div class="flex justify-between"><span class="text-slate-500">Account Number:</span><span class="text-blue-700 mono font-bold" id="invAccount"></span></div>
+          <div class="flex justify-between"><span class="text-slate-500">Account Type:</span><span class="text-slate-800" id="invAccType"></span></div>
+          <div class="flex justify-between"><span class="text-slate-500">Reference Memo:</span><span class="text-slate-900 mono font-bold" id="invMemo"></span></div>
+          <div class="flex justify-between pt-2 border-t border-slate-200"><span class="text-slate-600 font-medium">Amount Due:</span><span class="text-slate-900 font-extrabold mono">$149.00 USD</span></div>
+          <button type="button" id="copyAchBtn" onclick="copyInvoiceDetails()" class="mt-2 w-full bg-slate-900 hover:bg-slate-800 text-white font-semibold py-2.5 rounded-lg text-xs transition">
+            Copy Full U.S. Bank ACH Details
+          </button>
+        </div>
+
+        <div class="mt-4 pt-4 border-t border-slate-200">
+          <label class="block text-[11px] font-bold text-slate-700 mb-1.5">Already sent your $149 payment? Submit Sender Name or TxID for Priority Activation:</label>
+          <div class="flex gap-2">
+            <input type="text" id="paymentTxInput" placeholder="e.g. Remitly Ref / 0xTxHash / Bank Name" class="flex-1 bg-white border border-slate-300 rounded-lg px-3 py-2 text-xs text-slate-900 focus:border-emerald-600 focus:outline-none" />
+            <button type="button" id="confirmPaidBtn" onclick="submitPaymentProof()" class="bg-slate-900 hover:bg-emerald-600 text-white font-bold px-3.5 py-2 rounded-lg text-xs transition whitespace-nowrap">
+              Confirm Paid ✓
+            </button>
+          </div>
+          <p id="paymentProofSuccess" class="hidden text-[11px] font-semibold text-emerald-700 mt-1.5">
+            ✓ Payment confirmation logged! Your private Google Drive workspace is being provisioned now.
+          </p>
+        </div>
+
+        <div class="mt-4 pt-3 border-t border-slate-200 flex items-center justify-center gap-4 text-[11px] font-semibold text-slate-500">
+          <span>🔒 256-bit SSL Secure</span>
+          <span>•</span>
+          <span>0% Success Fee</span>
+          <span>•</span>
+          <span>No Lock-In</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const DEFAULT_STATE_SEATS = [
+      { code: "FL", name: "Florida", max: 8, used: 1, citiesCount: 16, cities: "Tampa, Orlando, Jacksonville, Miami, West Palm Beach, Fort Lauderdale, Cape Coral +9 more" },
+      { code: "TX", name: "Texas", max: 7, used: 1, citiesCount: 13, cities: "Houston, Dallas, San Antonio, Austin, Fort Worth, El Paso, Arlington, Plano +5 more" },
+      { code: "OH", name: "Ohio", max: 5, used: 1, citiesCount: 8, cities: "Columbus, Cleveland, Cincinnati, Dayton, Akron, Toledo, Canton, Youngstown" },
+      { code: "NC", name: "North Carolina", max: 4, used: 0, citiesCount: 7, cities: "Charlotte, Raleigh, Greensboro, Durham, Wilmington, Winston-Salem, Fayetteville" },
+      { code: "SC", name: "South Carolina", max: 3, used: 0, citiesCount: 5, cities: "Charleston, Columbia, Myrtle Beach, Greenville, Spartanburg" },
+      { code: "TN", name: "Tennessee", max: 3, used: 0, citiesCount: 5, cities: "Nashville, Memphis, Knoxville, Chattanooga, Clarksville" },
+      { code: "NY", name: "New York", max: 3, used: 0, citiesCount: 4, cities: "Rochester, Buffalo, Syracuse, Albany" },
+      { code: "GA", name: "Georgia", max: 3, used: 0, citiesCount: 4, cities: "Atlanta, Savannah, Augusta, Macon" },
+      { code: "AL", name: "Alabama", max: 3, used: 0, citiesCount: 4, cities: "Birmingham, Huntsville, Montgomery, Mobile" },
+      { code: "PA", name: "Pennsylvania", max: 3, used: 0, citiesCount: 3, cities: "Philadelphia, Pittsburgh, Harrisburg" },
+      { code: "AZ", name: "Arizona", max: 3, used: 0, citiesCount: 3, cities: "Phoenix, Tucson, Mesa" },
+      { code: "NV", name: "Nevada", max: 3, used: 0, citiesCount: 3, cities: "Las Vegas, Reno, Henderson" },
+      { code: "VA", name: "Virginia", max: 2, used: 0, citiesCount: 3, cities: "Richmond, Virginia Beach, Norfolk" },
+      { code: "MO", name: "Missouri", max: 2, used: 0, citiesCount: 3, cities: "Kansas City, St. Louis, Springfield" },
+      { code: "IN", name: "Indiana", max: 2, used: 0, citiesCount: 2, cities: "Indianapolis, Fort Wayne" },
+      { code: "MI", name: "Michigan", max: 2, used: 0, citiesCount: 2, cities: "Detroit, Grand Rapids" },
+      { code: "IL", name: "Illinois", max: 2, used: 0, citiesCount: 2, cities: "Chicago, Rockford" },
+      { code: "WI", name: "Wisconsin", max: 2, used: 0, citiesCount: 2, cities: "Milwaukee, Madison" },
+      { code: "KY", name: "Kentucky", max: 2, used: 0, citiesCount: 2, cities: "Louisville, Lexington" },
+      { code: "OK", name: "Oklahoma", max: 2, used: 0, citiesCount: 2, cities: "Oklahoma City, Tulsa" },
+      { code: "CO", name: "Colorado", max: 2, used: 0, citiesCount: 2, cities: "Denver, Colorado Springs" },
+      { code: "MD", name: "Maryland", max: 2, used: 0, citiesCount: 1, cities: "Baltimore" },
+      { code: "LA", name: "Louisiana", max: 1, used: 0, citiesCount: 1, cities: "New Orleans" },
+      { code: "AR", name: "Arkansas", max: 1, used: 0, citiesCount: 1, cities: "Little Rock" },
+      { code: "UT", name: "Utah", max: 1, used: 0, citiesCount: 1, cities: "Salt Lake City" },
+      { code: "ID", name: "Idaho", max: 1, used: 0, citiesCount: 1, cities: "Boise" }
+    ];
+
+    const FALLBACK_DEALS = [
+      { dealId: "USA-12040", state: "FL", city: "Jacksonville", zip: "32209", maskedAddress: "•••• W 28th St", layout: "3 Bed / 2 Bath", sqft: 1248, propertyDealType: "Single Family (Standard)", yearBuilt: "1986", hoaDues: "$0/mo", price: 104900, ppsf: 84, benchmark: 175, marketValue: 200928, equitySpread: 96028, discountPct: 48, hudYield: "18.2%", dom: 94, priceDropCount: 3, totalPriceDrop: 35000, dealScore: 88 },
+      { dealId: "USA-74025", state: "FL", city: "Jacksonville", zip: "32210", maskedAddress: "•••• Sawmill Point Way", layout: "3 Bed / 2 Bath", sqft: 1569, propertyDealType: "Single Family (Foreclosure/Auction)", yearBuilt: "2004", hoaDues: "$0/mo", price: 170000, ppsf: 108, benchmark: 175, marketValue: 252609, equitySpread: 82609, discountPct: 33, hudYield: "13.3%", dom: 78, priceDropCount: 2, totalPriceDrop: 24000, dealScore: 81 },
+      { dealId: "USA-90231", state: "FL", city: "Jacksonville", zip: "32218", maskedAddress: "•••• Planters Wood Dr", layout: "3 Bed / 2 Bath", sqft: 2254, propertyDealType: "Single Family (Short Sale)", yearBuilt: "2003", hoaDues: "$33/mo", price: 249900, ppsf: 111, benchmark: 175, marketValue: 362894, equitySpread: 112994, discountPct: 31, hudYield: "9.1%", dom: 112, priceDropCount: 4, totalPriceDrop: 49100, dealScore: 79 },
+      { dealId: "USA-44109", state: "TX", city: "Houston", zip: "77028", maskedAddress: "•••• Laura Koppe Rd", layout: "3 Bed / 2 Bath", sqft: 1410, propertyDealType: "Single Family (Standard)", yearBuilt: "1978", hoaDues: "$0/mo", price: 132000, ppsf: 94, benchmark: 169, marketValue: 219227, equitySpread: 87227, discountPct: 40, hudYield: "16.2%", dom: 85, priceDropCount: 2, totalPriceDrop: 18000, dealScore: 84 },
+      { dealId: "USA-61820", state: "OH", city: "Columbus", zip: "43211", maskedAddress: "•••• Cleveland Ave", layout: "4 Bed / 2 Bath", sqft: 1620, propertyDealType: "Single Family (Standard)", yearBuilt: "1954", hoaDues: "$0/mo", price: 118000, ppsf: 73, benchmark: 190, marketValue: 283176, equitySpread: 165176, discountPct: 58, hudYield: "19.2%", dom: 67, priceDropCount: 2, totalPriceDrop: 22000, dealScore: 89 },
+      { dealId: "USA-55312", state: "NC", city: "Charlotte", zip: "28208", maskedAddress: "•••• Tuckaseegee Rd", layout: "3 Bed / 1.5 Bath", sqft: 1320, propertyDealType: "Single Family (Standard)", yearBuilt: "1968", hoaDues: "$0/mo", price: 169000, ppsf: 128, benchmark: 235, marketValue: 285384, equitySpread: 116384, discountPct: 41, hudYield: "14.1%", dom: 73, priceDropCount: 3, totalPriceDrop: 31000, dealScore: 82 }
+    ];
+
+    let liveDeals = [...FALLBACK_DEALS];
+    let stateSeats = [...DEFAULT_STATE_SEATS];
+    let selectedStateForBooking = null;
+    let lastCreatedBooking = null;
+
+    function validateStrictEmail(email) {
+      if (!email) return { valid: false, msg: "Please enter your email address." };
+      const clean = email.trim().toLowerCase();
+      const pattern = /^[a-z0-9._%+-]{2,}@[a-z0-9.-]+\.[a-z]{2,10}$/;
+      if (!pattern.test(clean)) {
+        return { valid: false, msg: "Please enter a valid email address (e.g. name@gmail.com or name@company.com)." };
+      }
+      const parts = clean.split("@");
+      const local = parts[0];
+      const domain = parts[1];
+      const tld = domain.split(".").pop();
+
+      const invalidDomainTypos = ["gmail.c", "gmail.co", "gmail.con", "gmail.cm", "yahoo.c", "yahoo.con", "outlook.c", "outlook.con", "hotmail.c", "hotmail.con"];
+      if (invalidDomainTypos.includes(domain) || tld.length < 2) {
+        return { valid: false, msg: "Invalid email domain detected. Please check for typos (e.g. .com, .net, .org, .io)." };
+      }
+      if (/^(test|fake|asdf|qwerty|1234|aaaa|bbbb|none|noemail|spam)$/.test(local)) {
+        return { valid: false, msg: "Please enter a real investor or business email address to unlock the sample dossier." };
+      }
+      return { valid: true, email: clean };
+    }
+
+    function captureReferralParam() {
+      const params = new URLSearchParams(window.location.search);
+      const ref = params.get("ref");
+      if (ref && ref.trim()) {
+        try { localStorage.setItem("uds_partner_ref", ref.trim()); } catch (e) {}
+      }
+      let savedRef = "";
+      try { savedRef = localStorage.getItem("uds_partner_ref") || ""; } catch (e) {}
+      const refInput = document.getElementById("referredBy");
+      if (refInput && savedRef) {
+        refInput.value = savedRef;
+      }
+      return savedRef;
+    }
+
+    async function initPortal() {
+      captureReferralParam();
+      if (window.PORTAL_LIVE_DATA) {
+        if (window.PORTAL_LIVE_DATA.deals && window.PORTAL_LIVE_DATA.deals.length > 0) liveDeals = window.PORTAL_LIVE_DATA.deals;
+        if (window.PORTAL_LIVE_DATA.seats && window.PORTAL_LIVE_DATA.seats.length > 0) stateSeats = window.PORTAL_LIVE_DATA.seats;
+      }
+      try {
+        const res = await fetch("https://gist.githubusercontent.com/nayeembiswas440-sys/50d80b0f9ae568f763288caf0ddb0d76/raw/live_portal_data.json?t=" + Date.now());
+        if (res.ok) {
+          const data = await res.json();
+          if (data.deals && data.deals.length > 0) liveDeals = data.deals;
+          if (data.seats && data.seats.length > 0) stateSeats = data.seats;
+        }
+      } catch (e) {}
+      populateStateFilter();
+      renderDealsTable();
+      renderSeats();
+      startAllocationCountdown();
+      recalculateCustomDeal();
+    }
+
+    function startAllocationCountdown() {
+      const el = document.getElementById("scarcityCountdown");
+      if (!el) return;
+      function updateTimer() {
+        const now = new Date();
+        const cycleMs = 4 * 60 * 60 * 1000;
+        const remainingMs = cycleMs - (now.getTime() % cycleMs);
+        const hrs = String(Math.floor(remainingMs / 3600000)).padStart(2, "0");
+        const mins = String(Math.floor((remainingMs % 3600000) / 60000)).padStart(2, "0");
+        const secs = String(Math.floor((remainingMs % 60000) / 1000)).padStart(2, "0");
+        el.textContent = `${hrs}:${mins}:${secs}`;
+      }
+      updateTimer();
+      setInterval(updateTimer, 1000);
+    }
+
+    function populateStateFilter() {
+      const select = document.getElementById("stateFilter");
+      const uniqueStates = [...new Set(liveDeals.map(d => d.state))].sort();
+      select.innerHTML = `<option value="ALL">All Covered States (${liveDeals.length} Live Records)</option>`;
+      uniqueStates.forEach(st => { select.innerHTML += `<option value="${st}">${st} Inventory</option>`; });
+    }
+
+    function renderDealsTable() {
+      const filter = document.getElementById("stateFilter").value;
+      const filtered = filter === "ALL" ? liveDeals : liveDeals.filter(d => d.state === filter);
+      const tbody = document.getElementById("dealsTableBody");
+      tbody.innerHTML = filtered.slice(0, 12).map(d => {
+        const domVal = d.dom || 0;
+        const dropCount = d.priceDropCount || 0;
+        const dropDollars = d.totalPriceDrop || 0;
+        let dropBadge = `<span class="text-[11px] text-slate-500">Initial List</span>`;
+        if (dropCount > 0 && dropDollars > 0) {
+          dropBadge = `<span class="px-1.5 py-0.5 rounded bg-rose-50 text-rose-700 border border-rose-200 font-bold mono text-[10px]">${dropCount} Cuts (-$${dropDollars.toLocaleString()})</span>`;
+        } else if (dropCount > 0) {
+          dropBadge = `<span class="px-1.5 py-0.5 rounded bg-rose-50 text-rose-700 border border-rose-200 font-bold mono text-[10px]">MLS Price Cut</span>`;
+        }
+
+        return `
+        <tr class="hover:bg-slate-50/90 transition">
+          <td class="py-3.5 px-4 mono text-xs font-semibold text-slate-600 whitespace-nowrap">${d.dealId}</td>
+          <td class="py-3.5 px-4 whitespace-nowrap">
+            <div class="font-bold text-slate-900 text-xs sm:text-sm">${d.city}, ${d.state} <span class="text-slate-400 font-normal">${d.zip}</span></div>
+            <div class="text-xs text-slate-500 flex items-center gap-1.5 mt-0.5">
+              <span class="px-1.5 py-0.5 bg-amber-50 text-amber-800 border border-amber-200 rounded text-[10px] font-bold">MASKED</span>
+              <span class="mono blur-[2px] select-none">${d.maskedAddress}</span>
+            </div>
+          </td>
+          <td class="py-3.5 px-4 whitespace-nowrap">
+            <div class="text-xs font-bold text-slate-800 mono">${domVal > 0 ? domVal + ' Days on Market' : 'Fresh MLS Scan'}</div>
+            <div class="mt-0.5">${dropBadge}</div>
+          </td>
+          <td class="py-3.5 px-4 whitespace-nowrap">
+            <div class="text-xs font-medium text-slate-800">${d.layout} • ${d.sqft.toLocaleString()} SqFt</div>
+            <div class="text-[11px] text-slate-500">${d.propertyDealType} • Built ${d.yearBuilt}</div>
+          </td>
+          <td class="py-3.5 px-4 text-right mono font-bold text-slate-900 whitespace-nowrap">$${d.price.toLocaleString()}</td>
+          <td class="py-3.5 px-4 text-right mono text-slate-700 font-semibold whitespace-nowrap">$${d.marketValue.toLocaleString()}</td>
+          <td class="py-3.5 px-4 text-right mono font-bold text-emerald-700 whitespace-nowrap">+$${d.equitySpread.toLocaleString()} <span class="text-[11px] font-semibold">(${d.discountPct}%)</span></td>
+          <td class="py-3.5 px-4 text-right mono font-semibold text-blue-600 whitespace-nowrap">${d.hudYield}</td>
+          <td class="py-3.5 px-4 text-center whitespace-nowrap">
+            <span class="inline-block px-2 py-0.5 rounded bg-slate-100 text-slate-800 font-bold mono text-xs">${d.dealScore}</span>
+          </td>
+          <td class="py-3.5 px-4 text-right whitespace-nowrap">
+            <button onclick="openBookingModal('${d.state}')" class="inline-flex items-center px-3 py-1.5 rounded-lg bg-emerald-50 hover:bg-emerald-600 text-emerald-700 hover:text-white text-xs font-bold transition">
+              Unlock ${d.state} →
+            </button>
+          </td>
+        </tr>
+      `}).join("");
+      document.getElementById("feedCountLabel").textContent = `Showing ${Math.min(12, filtered.length)} of ${filtered.length} verified top 1% records`;
+    }
+
+    function renderSeats() {
+      const grid = document.getElementById("seatsGrid");
+      let totalRemaining = 0;
+      grid.innerHTML = stateSeats.map(s => {
+        const remaining = Math.max(0, s.max - s.used);
+        totalRemaining += remaining;
+        const isSoldOut = remaining === 0;
+        const isLow = remaining === 1;
+        return `
+          <div class="bg-slate-800/90 border ${isLow ? 'border-amber-500/50' : 'border-slate-700'} hover:border-emerald-500/60 rounded-2xl p-5 flex flex-col justify-between transition ${isSoldOut ? 'opacity-60' : ''}">
+            <div>
+              <div class="flex items-center justify-between gap-2">
+                <span class="font-bold text-white text-base">${s.name} (${s.code})</span>
+                <span class="text-[11px] font-bold px-2 py-0.5 rounded mono whitespace-nowrap ${isSoldOut ? 'bg-rose-500/20 text-rose-300 border border-rose-500/30' : 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/30'}">
+                  ${isSoldOut ? 'LOCKED' : remaining + '/' + s.max + ' OPEN'}
+                </span>
+              </div>
+              <div class="mt-2 text-xs font-semibold ${isSoldOut ? 'text-rose-400' : isLow ? 'text-amber-300' : 'text-emerald-400'}">
+                ${isSoldOut ? '0 seats left in ' + s.name : 'Currently ' + remaining + (remaining === 1 ? ' seat' : ' seats') + ' left in ' + s.name}
+              </div>
+              <p class="text-xs text-slate-400 mt-2 line-clamp-2 leading-relaxed">${s.citiesCount} Metros: ${s.cities}</p>
+            </div>
+            <button ${isSoldOut ? 'disabled' : `onclick="openBookingModal('${s.code}')"`} class="mt-4 w-full py-2.5 rounded-xl text-xs font-bold transition ${isSoldOut ? 'bg-slate-700 text-slate-400 cursor-not-allowed' : 'bg-emerald-600 hover:bg-emerald-500 text-white shadow-sm'}">
+              ${isSoldOut ? 'Territory Locked Forever' : 'Claim ' + s.code + ' Seat ($149/mo)'}
+            </button>
+          </div>
+        `;
+      }).join("");
+      document.getElementById("heroSeatsRemaining").textContent = `${totalRemaining} / 72 Open`;
+      const stickyBadge = document.getElementById("stickySeatsBadge");
+      if (stickyBadge) stickyBadge.textContent = `${totalRemaining}/72 Left`;
+    }
+
+    function applyRehabPreset(rehabPct) {
+      const arv = parseFloat(document.getElementById("inputArv").value) || 0;
+      const rehabDollars = Math.round(arv * (rehabPct / 100));
+      document.getElementById("inputRehab").value = rehabDollars;
+      document.querySelectorAll(".rehab-btn").forEach(btn => {
+        btn.className = parseInt(btn.dataset.pct) === rehabPct
+          ? "rehab-btn bg-slate-900 text-white font-semibold py-2 px-2.5 rounded-lg text-xs transition"
+          : "rehab-btn bg-white border border-slate-300 text-slate-700 hover:bg-slate-100 font-semibold py-2 px-2.5 rounded-lg text-xs transition";
+      });
+      recalculateCustomDeal();
+    }
+
+    function resetEditableCalc() {
+      document.getElementById("inputAsking").value = 155000;
+      document.getElementById("inputArv").value = 274260;
+      document.getElementById("inputClosingPct").value = 9;
+      applyRehabPreset(14);
+    }
+
+    function recalculateCustomDeal() {
+      const asking = parseFloat(document.getElementById("inputAsking").value) || 0;
+      const arv = parseFloat(document.getElementById("inputArv").value) || 0;
+      const rehab = parseFloat(document.getElementById("inputRehab").value) || 0;
+      const closingPct = parseFloat(document.getElementById("inputClosingPct").value) || 0;
+
+      const mao = Math.round((arv * 0.70) - rehab);
+      const closingCost = Math.round(arv * (closingPct / 100));
+      const netProfit = Math.round(arv - asking - rehab - closingCost);
+      const totalBasis = asking + rehab;
+      const roi = totalBasis > 0 ? ((netProfit / totalBasis) * 100).toFixed(1) : "0.0";
+
+      const maoEl = document.getElementById("calcMao");
+      maoEl.textContent = (mao < 0 ? "-$" + Math.abs(mao).toLocaleString() : "$" + mao.toLocaleString());
+
+      document.getElementById("calcClosingCost").textContent = "$" + closingCost.toLocaleString();
+      document.getElementById("calcClosingSub").textContent = `${closingPct.toFixed(1)}% of ARV`;
+
+      const profitEl = document.getElementById("calcNetProfit");
+      profitEl.textContent = (netProfit < 0 ? "-$" + Math.abs(netProfit).toLocaleString() : "$" + netProfit.toLocaleString());
+      profitEl.className = netProfit >= 0
+        ? "text-base sm:text-lg font-bold text-emerald-600 mono mt-1"
+        : "text-base sm:text-lg font-bold text-rose-600 mono mt-1";
+
+      const roiEl = document.getElementById("calcRoi");
+      roiEl.textContent = roi + "%";
+      roiEl.className = netProfit >= 0
+        ? "text-base sm:text-lg font-bold text-emerald-600 mono mt-1"
+        : "text-base sm:text-lg font-bold text-rose-600 mono mt-1";
+    }
+
+    // HIGH-CONVERTING 26-COLUMN EXECUTIVE SAMPLE DOSSIER GENERATOR (WITH CASH OFFER SCRIPT PREVIEW)
+    function downloadSampleCSV(selectedState) {
+      const headers = [
+        "Status,Record ID,State,City,Masked Street Address,Zip,Days on Market (DOM),Price Drop Count,Price-Drop Status,Layout,SqFt,Property & Deal Type,Year Built,HOA Dues ($/mo),Purchase Price ($),Purchase $/SqFt,Submarket Median $/SqFt,Conservative ARV (0.92x),Est. Rehab Scope (14%),Est. Rehab Cost ($),70% Rule MAO ($),Est. Net Flip Profit ($),Cash-on-Cost ROI (%),HUD Gross Yield,Ready-to-Send Cash Offer Script (Preview),Underwriting Verdict & Exit Strategy"
+      ];
+
+      let pool = liveDeals;
+      if (selectedState && selectedState !== "OTHER") {
+        const stateMatches = liveDeals.filter(d => d.state === selectedState);
+        if (stateMatches.length >= 3) pool = stateMatches.concat(liveDeals.filter(d => d.state !== selectedState));
+      }
+
+      const rows = pool.slice(0, 15).map(d => {
+        const price = Number(d.price) || 120000;
+        const arv = Number(d.marketValue) || Math.round(price * 1.65);
+        const rehabCost = Math.round(arv * 0.14);
+        const mao70 = Math.max(25000, Math.round((arv * 0.70) - rehabCost));
+        const closing9 = Math.round(arv * 0.09);
+        const netProfit = Math.round(arv - price - rehabCost - closing9);
+        const roiPct = ((netProfit / Math.max(price + rehabCost, 1)) * 100).toFixed(1) + "%";
+        const dropCnt = d.priceDropCount || 0;
+        const dropStatus = d.totalPriceDrop > 0 ? `-$${Number(d.totalPriceDrop).toLocaleString()}` : (dropCnt > 0 ? "Verified MLS Price Cut" : "Below Submarket Median");
+        const offerScript = `Hi, I'm a local cash buyer reviewing ${d.maskedAddress}, ${d.city}. Based on submarket comps ($${d.benchmark}/sqft) and rehab scope, we can close all-cash in 10-14 days with zero contingencies at $${mao70.toLocaleString()}.`;
+        const verdict = price <= mao70
+          ? `PRIME 70% RULE DEAL (${d.discountPct}% Below Median — Immediate Flip/Wholesale Spread)`
+          : `HIGH-EQUITY BRRRR / VALUE-ADD ($${netProfit.toLocaleString()} Est. Net Spread @ ${d.hudYield} HUD Yield)`;
+
+        return `"ACTIVE","${d.dealId}","${d.state}","${d.city}","${d.maskedAddress} (Unlocks in Drive)","${d.zip}","${d.dom || 0} Days","${dropCnt}","${dropStatus}","${d.layout}","${d.sqft}","${d.propertyDealType}","${d.yearBuilt}","${d.hoaDues}","$${price.toLocaleString()}","$${d.ppsf}/sqft","$${d.benchmark}/sqft","$${arv.toLocaleString()}","14% (Light)","$${rehabCost.toLocaleString()}","$${mao70.toLocaleString()}","$${netProfit.toLocaleString()}","${roiPct}","${d.hudYield}","${offerScript}","${verdict}"`;
+      });
+
+      const blob = new Blob([headers.concat(rows).join("\n")], { type: "text/csv;charset=utf-8;" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `Upstream_Executive_26Col_Underwriting_Sample_${selectedState || 'USA'}.csv`;
+      a.click();
+      URL.revokeObjectURL(url);
+    }
+
+    async function submitSampleLead(e) {
+      e.preventDefault();
+      const btn = document.getElementById("sampleLeadBtn");
+      const rawEmail = document.getElementById("sampleLeadEmail").value;
+      const errEl = document.getElementById("sampleLeadError");
+      const okEl = document.getElementById("sampleLeadSuccess");
+
+      errEl.classList.add("hidden");
+      okEl.classList.add("hidden");
+
+      const check = validateStrictEmail(rawEmail);
+      if (!check.valid) {
+        errEl.textContent = "⚠️ " + check.msg;
+        errEl.classList.remove("hidden");
+        return;
+      }
+
+      const email = check.email;
+      const targetState = document.getElementById("sampleLeadState").value;
+      const refPartner = captureReferralParam() || "Direct";
+      const timeStr = new Date().toLocaleString("en-US", { timeZone: "Asia/Dhaka" }) + " (BDT)";
+
+      btn.textContent = "Generating 26-Col Dossier...";
+      btn.disabled = true;
+
+      const reqs = [];
+      if (PORTAL_CONFIG.crmSyncEndpoint && PORTAL_CONFIG.crmSyncEndpoint.startsWith("https://script.google.com")) {
+        reqs.push(
+          fetch(PORTAL_CONFIG.crmSyncEndpoint, {
+            method: "POST",
+            mode: "no-cors",
+            headers: { "Content-Type": "text/plain" },
+            body: JSON.stringify({
+              action: "SAMPLE_LEAD",
+              timestamp: timeStr,
+              invoiceId: "FREE-SAMPLE",
+              clientName: "Sample Dossier Lead",
+              clientEmail: email,
+              clientPhone: "N/A",
+              state: targetState,
+              paymentMethod: "SAMPLE_DOSSIER",
+              referredBy: refPartner
+            })
+          }).catch(() => {})
+        );
+      }
+
+      reqs.push(
+        fetch("/", {
+          method: "POST",
+          headers: { "Content-Type": "application/x-www-form-urlencoded" },
+          body: new URLSearchParams({
+            "form-name": "sample-dossier",
+            leadEmail: email,
+            targetState: targetState,
+            referredBy: refPartner
+          }).toString()
+        }).catch(() => {})
+      );
+
+      await Promise.race([Promise.allSettled(reqs), new Promise(r => setTimeout(r, 1200))]);
+      downloadSampleCSV(targetState);
+
+      btn.textContent = "Download Dossier →";
+      btn.disabled = false;
+      document.getElementById("sampleLeadEmail").value = "";
+      okEl.classList.remove("hidden");
+    }
+
+    function copyReferralLink() {
+      const partnerEmail = prompt("Enter your valid email to generate your personal $50 Referral Link:");
+      const check = validateStrictEmail(partnerEmail);
+      if (!check.valid) {
+        if (partnerEmail !== null) alert(check.msg);
+        return;
+      }
+      const refUrl = `${window.location.origin}/?ref=${encodeURIComponent(check.email)}`;
+      navigator.clipboard.writeText(refUrl);
+      const btn = document.getElementById("copyRefLinkBtn");
+      btn.textContent = "✓ Personal Link Copied!";
+      setTimeout(() => { btn.textContent = "Generate & Copy Referral Link"; }, 3000);
+    }
+
+    function openBookingModal(stateCode) {
+      captureReferralParam();
+      const st = stateSeats.find(x => x.code === stateCode) || stateSeats[0];
+      selectedStateForBooking = st;
+      document.getElementById("modalStateTitle").textContent = `${st.name} (${st.code})`;
+      document.getElementById("modalCitiesSubtitle").textContent = `Covers ${st.citiesCount} liquidity cities • ${Math.max(0, st.max - st.used)} of ${st.max} exclusive seats left`;
+      document.getElementById("modalStepForm").classList.remove("hidden");
+      document.getElementById("modalStepInvoice").classList.add("hidden");
+      document.getElementById("paymentProofSuccess").classList.add("hidden");
+      document.getElementById("paymentTxInput").value = "";
+      document.getElementById("bookingModal").classList.remove("hidden");
+    }
+
+    function closeModal() {
+      document.getElementById("bookingModal").classList.add("hidden");
+    }
+
+    function switchPaymentTab(tabName) {
+      ["REMITLY", "CRYPTO", "ACH"].forEach(t => {
+        const box = document.getElementById("box" + t);
+        const btn = document.getElementById("tab" + t);
+        if (t === tabName) {
+          box.classList.remove("hidden");
+          btn.className = "py-1.5 rounded-md bg-white text-slate-900 shadow-2xs";
+        } else {
+          box.className = "hidden";
+          btn.className = "py-1.5 rounded-md text-slate-600 hover:text-slate-900";
+        }
+      });
+    }
+
+    async function submitReservation(e) {
+      e.preventDefault();
+      const emailCheck = validateStrictEmail(document.getElementById("clientEmail").value);
+      if (!emailCheck.valid) {
+        alert(emailCheck.msg);
+        return;
+      }
+
+      const btn = document.getElementById("submitSeatBtn");
+      btn.textContent = "Securing Territory License...";
+      btn.disabled = true;
+
+      const name = document.getElementById("clientName").value.trim();
+      const email = emailCheck.email;
+      const phone = document.getElementById("clientPhone").value.trim() || "Not Provided";
+      const method = document.getElementById("paymentMethod").value;
+      const refPartner = document.getElementById("referredBy").value.trim() || "Direct";
+      const stCode = selectedStateForBooking ? selectedStateForBooking.code : "FL";
+      const invCode = `INV-${stCode}-${Math.floor(1000 + Math.random() * 9000)}`;
+      const timeStr = new Date().toLocaleString("en-US", { timeZone: "Asia/Dhaka" }) + " (BDT)";
+
+      lastCreatedBooking = {
+        invoiceId: invCode,
+        clientName: name,
+        clientEmail: email,
+        clientPhone: phone,
+        state: stCode,
+        paymentMethod: method,
+        referredBy: refPartner
+      };
+
+      const requests = [];
+
+      if (PORTAL_CONFIG.crmSyncEndpoint && PORTAL_CONFIG.crmSyncEndpoint.startsWith("https://script.google.com")) {
+        requests.push(
+          fetch(PORTAL_CONFIG.crmSyncEndpoint, {
+            method: "POST",
+            mode: "no-cors",
+            headers: { "Content-Type": "text/plain" },
+            body: JSON.stringify({
+              action: "BOOKING",
+              timestamp: timeStr,
+              invoiceId: invCode,
+              clientName: name,
+              clientEmail: email,
+              clientPhone: phone,
+              state: stCode,
+              paymentMethod: method,
+              referredBy: refPartner
+            })
+          }).catch(() => {})
+        );
+      }
+
+      const netlifyBody = new URLSearchParams({
+        "form-name": "seat-booking",
+        invoiceId: invCode,
+        clientName: name,
+        clientEmail: email,
+        clientPhone: phone,
+        state: stCode,
+        paymentMethod: method,
+        referredBy: refPartner,
+        amountUsd: "$149"
+      }).toString();
+
+      requests.push(
+        fetch("/", {
+          method: "POST",
+          headers: { "Content-Type": "application/x-www-form-urlencoded" },
+          body: netlifyBody
+        }).catch(() => {})
+      );
+
+      await Promise.race([
+        Promise.allSettled(requests),
+        new Promise(r => setTimeout(r, 1500))
+      ]);
+
+      btn.textContent = "Continue to Secure Checkout ($149/mo Flat) →";
+      btn.disabled = false;
+
+      document.getElementById("invoiceRef").textContent = invCode;
+      document.getElementById("remitlyMemo").textContent = `${invCode} (${stCode})`;
+      document.getElementById("remitlyDirectLink").href = PORTAL_CONFIG.remitlyUrl;
+      document.getElementById("cryptoAddrText").textContent = PORTAL_CONFIG.crypto.walletAddress;
+
+      document.getElementById("invBeneficiary").textContent = PORTAL_CONFIG.usBankAch.beneficiaryName;
+      document.getElementById("invBank").textContent = PORTAL_CONFIG.usBankAch.bankName;
+      document.getElementById("invBankAddr").textContent = PORTAL_CONFIG.usBankAch.bankAddress;
+      document.getElementById("invRouting").textContent = PORTAL_CONFIG.usBankAch.routingNumber;
+      document.getElementById("invAccount").textContent = PORTAL_CONFIG.usBankAch.accountNumber;
+      document.getElementById("invAccType").textContent = PORTAL_CONFIG.usBankAch.accountType;
+      document.getElementById("invMemo").textContent = `${invCode} (${stCode})`;
+
+      switchPaymentTab(method);
+      document.getElementById("modalStepForm").classList.add("hidden");
+      document.getElementById("modalStepInvoice").classList.remove("hidden");
+    }
+
+    async function submitPaymentProof() {
+      if (!lastCreatedBooking) return;
+      const btn = document.getElementById("confirmPaidBtn");
+      const txRef = document.getElementById("paymentTxInput").value.trim() || "Client Confirmed Transfer";
+      const timeStr = new Date().toLocaleString("en-US", { timeZone: "Asia/Dhaka" }) + " (BDT)";
+
+      btn.textContent = "Logging...";
+      btn.disabled = true;
+
+      const reqs = [];
+      if (PORTAL_CONFIG.crmSyncEndpoint && PORTAL_CONFIG.crmSyncEndpoint.startsWith("https://script.google.com")) {
+        reqs.push(
+          fetch(PORTAL_CONFIG.crmSyncEndpoint, {
+            method: "POST",
+            mode: "no-cors",
+            headers: { "Content-Type": "text/plain" },
+            body: JSON.stringify({
+              action: "PAYMENT_CONFIRMED",
+              timestamp: timeStr,
+              invoiceId: lastCreatedBooking.invoiceId,
+              clientName: lastCreatedBooking.clientName,
+              clientEmail: lastCreatedBooking.clientEmail,
+              clientPhone: lastCreatedBooking.clientPhone,
+              state: lastCreatedBooking.state,
+              paymentMethod: lastCreatedBooking.paymentMethod,
+              referredBy: lastCreatedBooking.referredBy,
+              txReference: txRef
+            })
+          }).catch(() => {})
+        );
+      }
+
+      reqs.push(
+        fetch("/", {
+          method: "POST",
+          headers: { "Content-Type": "application/x-www-form-urlencoded" },
+          body: new URLSearchParams({
+            "form-name": "payment-confirmation",
+            invoiceId: lastCreatedBooking.invoiceId,
+            clientEmail: lastCreatedBooking.clientEmail,
+            txReference: txRef
+          }).toString()
+        }).catch(() => {})
+      );
+
+      await Promise.race([Promise.allSettled(reqs), new Promise(r => setTimeout(r, 1200))]);
+
+      btn.textContent = "Confirmed ✓";
+      btn.disabled = false;
+      document.getElementById("paymentProofSuccess").classList.remove("hidden");
+    }
+
+    function copyCryptoAddress() {
+      navigator.clipboard.writeText(PORTAL_CONFIG.crypto.walletAddress);
+      const btn = document.getElementById("copyCryptoBtn");
+      btn.textContent = "✓ BEP20 Address Copied!";
+      setTimeout(() => { btn.textContent = "Copy BEP20 Wallet Address"; }, 2500);
+    }
+
+    function copyInvoiceDetails() {
+      const inv = document.getElementById("invoiceRef").textContent;
+      const b = PORTAL_CONFIG.usBankAch;
+      const text = `Upstream Deal Sourcing Invoice: ${inv}\nAmount: $149.00 USD\nBeneficiary: ${b.beneficiaryName}\nBank: ${b.bankName} (${b.bankAddress})\nRouting (ACH): ${b.routingNumber}\nAccount Number: ${b.accountNumber}\nAccount Type: ${b.accountType}\nMemo: ${inv}`;
+      navigator.clipboard.writeText(text);
+      const btn = document.getElementById("copyAchBtn");
+      btn.textContent = "✓ Full ACH Details Copied!";
+      setTimeout(() => { btn.textContent = "Copy Full U.S. Bank ACH Details"; }, 2500);
+    }
+
+    initPortal();
+  </script>
+</body>
+</html>
